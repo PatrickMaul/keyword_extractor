@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "package_name"
+version = "0.0.1"
+description = "<DESCRIPTION>"
+authors = [
+  { name="AUTHOR_NAME", email="AUTHOR_MAIL@gmail.com" },
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  # Add your requirements here!
+  # Example: "PyYAML==6.0.1"
+]
+
+[project.optional-dependencies]
+quality = [
+    "flake8",
+    "mypy",
+    "black"
+]
+test = [
+    "coverage"
+]
+build = [
+    "build",
+    "twine"
+]
+dev = [
+    "package_name[quality,test]"
+]
+
+[project.urls]
+"Homepage" = "<REPOSITORY_LINK>"
+"Bug Tracker" = "<REPOSITORY_LINK>/issues"
+
+[tool.setuptools]
+platforms = ["Linux"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["test"]
+
+[tool.black]
+line-length = 120
+
+# [[tool.mypy.overrides]]
+# module = "foo.*"
+# ignore_missing_imports = true
+
