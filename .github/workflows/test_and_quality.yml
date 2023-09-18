@@ -22,7 +22,7 @@ jobs:
           pip install .
       - name: Export Python path
         run:
-          export PYTHONPATH=home/runner/work/python-packages-template/python-packages-template/:home/runner/work/python-packages-template/python-packages-template/package_name/
+          export PYTHONPATH=home/runner/work/keyword_extractor/keyword_extractor/:home/runner/work/keyword_extractor/keyword_extractor/keyword_extractor/
       - name: Run unittests
         run: |
           python -m unittest discover test/tests/unit
@@ -44,7 +44,7 @@ jobs:
           pip install '.[test]'
       - name: Export Python path
         run:
-          export PYTHONPATH=home/runner/work/config_loader_pkg/config_loader_pkg/:home/runner/work/config_loader_pkg/config_loader_pkg/pm_config_loader/
+          export PYTHONPATH=home/runner/work/keyword_extractor/keyword_extractor/:home/runner/work/keyword_extractor/keyword_extractor/keyword_extractor/
       - name: Coverage
         run: |
           coverage run --source=./src -m unittest discover ./test/tests/unit
@@ -73,7 +73,7 @@ jobs:
           pip install '.[quality]'
       - name: Export Python path
         run:
-          export PYTHONPATH=home/runner/work/python-packages-template/python-packages-template/:home/runner/work/python-packages-template/python-packages-template/package_name/
+          export PYTHONPATH=home/runner/work/keyword_extractor/keyword_extractor/:home/runner/work/keyword_extractor/keyword_extractor/keyword_extractor/
       - name: Run black
         run: |
           black --check .
@@ -95,7 +95,7 @@ jobs:
           pip install '.[quality]'
       - name: Export Python path
         run:
-          export PYTHONPATH=home/runner/work/python-packages-template/python-packages-template/:home/runner/work/python-packages-template/python-packages-template/package_name/
+          export PYTHONPATH=home/runner/work/keyword_extractor/keyword_extractor/:home/runner/work/keyword_extractor/keyword_extractor/keyword_extractor/
       - name: Run flake8
         run: |
           flake8 --config ./.flake8
@@ -117,7 +117,7 @@ jobs:
           pip install '.[quality]'
       - name: Export Python path
         run:
-          export PYTHONPATH=home/runner/work/python-packages-template/python-packages-template/:home/runner/work/python-packages-template/python-packages-template/package_name/
+          export PYTHONPATH=home/runner/work/keyword_extractor/keyword_extractor/:home/runner/work/keyword_extractor/keyword_extractor/keyword_extractor/
       - name: Run flake8
         run: |
            mypy ./src

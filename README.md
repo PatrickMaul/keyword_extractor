@@ -26,15 +26,15 @@ This repository is just a template for Python Packages.
 
 ## Project Setup
 
-To collaborate on the `package_name` module, follow these steps:
+To collaborate on the `keyword_extractor` module, follow these steps:
 
 1. Open a terminal or command prompt.
 2. Navigate to the directory where you want the project to reside.
 3. Execute the following command to clone the repository:
    ```bash
-   git clone repository-link
+   git clone https://github.com/PatrickMaul/keyword_extractor
    ```
-4. Navigate to the root directory of your project. `cd ./package_name`
+4. Navigate to the root directory of your project. `cd ./keyword_extractor`
 5. Execute the one of following commands to install dependencies:  
    Using `requirements.txt`
    ```bash
@@ -51,11 +51,11 @@ To collaborate on the `package_name` module, follow these steps:
 
 ### Unittests & Coverage
 
-To run unittests for the `package_name` module, follow these steps:
+To run unittests for the `keyword_extractor` module, follow these steps:
 
 1. Open a terminal or command prompt.
 
-2. Navigate to the root directory of the `package_name` module.
+2. Navigate to the root directory of the `keyword_extractor` module.
 
     - Execute the following command to run unit tests:
        ```bash
@@ -72,11 +72,11 @@ To run unittests for the `package_name` module, follow these steps:
 
 ### Code quality
 
-To run linter, formatter and typ checker for the `package_name` module, follow these steps:
+To run linter, formatter and typ checker for the `keyword_extractor` module, follow these steps:
 
 1. Open a terminal or command prompt.
 
-2. Navigate to the root directory of the `package_name` module.
+2. Navigate to the root directory of the `keyword_extractor` module.
 
 #### Formatting with Black
 
@@ -104,9 +104,9 @@ mypy .
 
 ## Building
 
-To build the `package_name` module, follow these steps:
+To build the `keyword_extractor` module, follow these steps:
 
-1. Navigate to the root directory of the `package_name` module.
+1. Navigate to the root directory of the `keyword_extractor` module.
 2. Make sure you have `build` installed. If not, you can install it using the following command:
    ```bash
    pip install -U build
@@ -119,9 +119,9 @@ To build the `package_name` module, follow these steps:
 
 ## Publishing
 
-To upload the `package_name` module using `twine`, follow these steps:
+To upload the `keyword_extractor` module using `twine`, follow these steps:
 
-1. Navigate to the root directory of the `package_name` module.
+1. Navigate to the root directory of the `keyword_extractor` module.
 2. Make sure you have `twine` installed. If not, you can install it using the following command:
    ```bash
    pip install -U twine
@@ -133,7 +133,7 @@ To upload the `package_name` module using `twine`, follow these steps:
 
 ## Example Usage
 
-Here is a simple example of how you can use the `package_name` module:
+Here is a simple example of how you can use the `keyword_extractor` module:
 
 ```python
 # Example usage goes here

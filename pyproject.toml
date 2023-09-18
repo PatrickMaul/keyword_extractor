@@ -3,11 +3,11 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "package_name"
+name = "keyword_extractor"
 version = "0.0.1"
 description = "<DESCRIPTION>"
 authors = [
-  { name="AUTHOR_NAME", email="AUTHOR_MAIL@gmail.com" },
+  { name="Patrick Maul", email="maulpatrick1996@gmail.com" },
 ]
 readme = "README.md"
 requires-python = ">=3.10"
@@ -30,12 +30,12 @@ build = [
     "twine"
 ]
 dev = [
-    "package_name[quality,test]"
+    "keyword_extractor[quality,test]"
 ]
 
 [project.urls]
-"Homepage" = "<REPOSITORY_LINK>"
-"Bug Tracker" = "<REPOSITORY_LINK>/issues"
+"Homepage" = "https://github.com/PatrickMaul/keyword_extractor"
+"Bug Tracker" = "https://github.com/PatrickMaul/keyword_extractor/issues"
 
 [tool.setuptools]
 platforms = ["Linux"]
