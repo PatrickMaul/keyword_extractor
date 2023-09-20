@@ -10,6 +10,7 @@ from utils import (
     remove_duplicates,
     remove_stop_words,
 )
+from typing import Dict, List
 
 
 class KeywordExtractor:
@@ -24,21 +25,21 @@ class KeywordExtractor:
     def update_txt(self, new_txt: str) -> None:
         self.txt = new_txt
 
-    def _extract(self) -> dict:
-        result: dict = {"text": self.txt, "extraction_method": self.method, "keywords": None}
+    def _extract(self) -> Dict:
+        result: Dict = {"text": self.txt, "extraction_method": self.method, "keywords": [], "file": File()}
 
         if self.method == "wf":
-            extract = self._extract_with_word_frequency()
-            result["keywords"] = extract.get("keywords")
-            result["file"] = extract.get("file").as_dict()
+            keywords, file = self._extract_with_word_frequency()
+            result["keywords"] = keywords
+            result["file"] = file.as_dict()
         elif self.method == "tfidf":
-            extract = self._extract_with_tf_idf(doc_counter=1)
-            result["keywords"] = extract.get("keywords")
-            result["file"] = extract.get("file").as_dict()
+            keywords, file = self._extract_with_tf_idf(doc_counter=1)
+            result["keywords"] = keywords
+            result["file"] = file.as_dict()
         elif self.method == "pr":
-            extract = self._extract_with_page_rank()
-            result["keywords"] = extract.get("keywords")
-            result["file"] = extract.get("file").as_dict()
+            keywords, file = self._extract_with_page_rank()
+            result["keywords"] = keywords
+            result["file"] = file.as_dict()
         elif self.method == "full":
             # ToDo: Define full extraction with all methods
             pass
@@ -48,21 +49,21 @@ class KeywordExtractor:
 
         return result
 
-    def _extract_with_word_frequency(self, max_keywords: int = 10) -> dict:
+    def _extract_with_word_frequency(self, max_keywords: int = 10) -> List:
         file: File = self._base_extraction()
 
-        clean_words = file.get_metric(metric_type="stop_word_free", key="words")
+        clean_words: List = file.get_metric(metric_type="stop_word_free", key="words")
 
-        word_counts = {}
+        word_counts: Dict = {}
         for word in clean_words:
             if word not in word_counts.keys():
                 word_counts[word] = 1
             else:
                 word_counts[word] += 1
 
-        raw_file_length = len(file.get_metric(metric_type="tokens", key="words"))
+        raw_file_length: int = len(file.get_metric(metric_type="tokens", key="words"))
 
-        term_frequencies = {}
+        term_frequencies: Dict = {}
         for word, count in word_counts.items():
             term_frequencies[word] = count / raw_file_length
 
@@ -70,16 +71,16 @@ class KeywordExtractor:
         file.add_metric(metric_type="word_frequency", key="raw_file_length", value=raw_file_length)
         file.add_metric(metric_type="word_frequency", key="term_frequencies", value=term_frequencies)
 
-        return {
-            "keywords": self._get_keywords(
+        return [
+            self._get_keywords(
                 data=file.get_metric(metric_type="word_frequency", key="term_frequencies"),
                 max_length=max_keywords,
             ),
-            "file": file,
-        }
+            file,
+        ]
 
-    def _extract_with_tf_idf(self, doc_counter: int = 1, max_keywords: int = 10) -> dict:
-        file: File = self._extract_with_word_frequency().get("file")
+    def _extract_with_tf_idf(self, doc_counter: int = 1, max_keywords: int = 10) -> List:
+        file: File = self._extract_with_word_frequency()[1]
         tokens = file.get_metric(metric_type="word_frequency", key="word_counts").keys()
         document_frequencies = {}
         inverse_document_frequencies = {}
@@ -94,9 +95,11 @@ class KeywordExtractor:
         for key, value in document_frequencies.items():
             inverse_document_frequencies[key] = 1 + math.log(doc_counter / value)
 
-        for key, value in inverse_document_frequencies.items():
+        keys: List[str] = list(inverse_document_frequencies.keys())
+        for index, key in enumerate(keys):
+            tf_idf: float = list(inverse_document_frequencies.values())[index]
             term_frequency_inverse_document_frequencies[key] = (
-                len(file.get_metric(metric_type="word_frequency", key="term_frequencies").keys()) * value
+                len(file.get_metric(metric_type="word_frequency", key="term_frequencies").keys()) * tf_idf
             )
 
         file.add_metric(metric_type="tf_idf", key="document_frequencies", value=document_frequencies)
@@ -109,16 +112,16 @@ class KeywordExtractor:
             value=term_frequency_inverse_document_frequencies,
         )
 
-        return {
-            "keywords": self._get_keywords(
+        return [
+            self._get_keywords(
                 data=file.get_metric(metric_type="tf_idf", key="term_frequency_inverse_document_frequencies"),
                 max_length=max_keywords,
             ),
-            "file": file,
-        }
+            file,
+        ]
 
-    def _extract_with_page_rank(self, doc_counter: int = 1, max_keywords: int = 10) -> dict:
-        file: File = self._extract_with_tf_idf(doc_counter=doc_counter).get("file")
+    def _extract_with_page_rank(self, doc_counter: int = 1, max_keywords: int = 10) -> List:
+        file: File = self._extract_with_tf_idf(doc_counter=doc_counter)[1]
 
         stemmed_words = []
         for sentence in file.get_metric(metric_type="stop_word_free", key="words_per_sentence"):
@@ -162,7 +165,7 @@ class KeywordExtractor:
                         mapped_top_keywords.append(c_word)
                         break
 
-        return {"keywords": mapped_top_keywords, "file": file}
+        return [mapped_top_keywords, file]
 
     def _base_extraction(self) -> File:
         file: File = File()
@@ -276,7 +279,7 @@ class KeywordExtractor:
         return file
 
     @staticmethod
-    def _get_keywords(data: dict, max_length: int = 10):
+    def _get_keywords(data: Dict, max_length: int = 10):
         mapped_list = []
         for key, value in data.items():
             mapped_list.append({"word": key, "value": value})

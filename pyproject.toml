@@ -58,3 +58,7 @@ line-length = 110
 module = "nltk.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "networkx.*"
+ignore_missing_imports = true
+

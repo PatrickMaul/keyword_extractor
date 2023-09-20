@@ -2,14 +2,14 @@ import re
 import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
-from typing import Any
+from typing import Union, Dict, List, Any
 
 
-def flatten_nested_lists(collection: list[list | str]) -> list[Any]:
+def flatten_nested_lists(collection: Union[List[str], List[List[str]]]) -> List[Any]:
     flatted_list = []  # Set empty flatted list
 
     for value in collection:
-        if isinstance(value, list) and not isinstance(value, str):  # `value` is a list and not a string
+        if isinstance(value, List) and not isinstance(value, str):  # `value` is a list and not a string
             for x in flatten_nested_lists(value):
                 flatted_list.append(x)
         else:  # Otherwise `value` must be a string
@@ -19,7 +19,7 @@ def flatten_nested_lists(collection: list[list | str]) -> list[Any]:
     return flatted_list
 
 
-def remove_duplicates(collection: list[str]) -> list[str]:
+def remove_duplicates(collection: List[str]) -> List[str]:
     duplicate_free_result = []
 
     for word in collection:
@@ -29,7 +29,7 @@ def remove_duplicates(collection: list[str]) -> list[str]:
     return duplicate_free_result
 
 
-def remove_stop_words(collection: list[list[str]], lang: str = "english"):
+def remove_stop_words(collection: List[List[str]], lang: str = "english"):
     stop_words: set = set(stopwords.words(lang))
     filtered_words_per_sentence = []
 
@@ -49,15 +49,19 @@ class Tokenizer:
         pass
 
     @staticmethod
-    def text_to_paragraphs(txt: str) -> list[str]:
+    def text_to_paragraphs(txt: Union[str, None]) -> List[str]:
         # Return a list without empty strings and without leading or trailing spaces
         # Step 1: txt.split('\n')
         # Step 2: [x.strip() for x in Step 1 if x]
         # Step 3: [y for y in Step 2 if y]
-        return [y for y in [x.strip() for x in txt.split("\n") if x] if y]
+        if txt:
+            return [y for y in [x.strip() for x in txt.split("\n") if x] if y]
+        else:
+            raise ValueError("Text is not set, please first add a text!")
 
-    def paragraphs_to_sentences_per_paragraph(self, paragraphs: list[str]) -> list[list[str]]:
-        sentences_per_paragraph: list = []  # Set empty result list
+    @staticmethod
+    def paragraphs_to_sentences_per_paragraph(paragraphs: List[str]) -> List[List[str]]:
+        sentences_per_paragraph: List = []  # Set empty result list
 
         for paragraph in paragraphs:  # Iterate through all paragraphs
             sentences = [
@@ -69,18 +73,19 @@ class Tokenizer:
                     sentences[index] = value.split("?")
                 if "!" in value:  # Split by '!'
                     sentences[index] = value.split("!")
-            sentences = flatten_nested_lists(collection=sentences)  # Remove nested lists
+            _sentences = flatten_nested_lists(collection=sentences)  # Remove nested lists
             sentences_per_paragraph.append(
-                [x.strip() for x in sentences if x]
+                [x.strip() for x in _sentences if x]
             )  # Remove leading or trailing spaces
 
         return sentences_per_paragraph
 
-    def sentences_per_paragraph_to_sentences(self, sentences_per_paragraph: list[list[str]]) -> list[str]:
+    @staticmethod
+    def sentences_per_paragraph_to_sentences(sentences_per_paragraph: List[List[str]]) -> List[str]:
         return flatten_nested_lists(collection=sentences_per_paragraph)
 
     @staticmethod
-    def sentences_to_words_per_sentence(sentences: list[str]) -> list[list[str]]:
+    def sentences_to_words_per_sentence(sentences: List[str]) -> List[List[str]]:
         pattern = r"\b\w+\b"
         words_in_sentence = []
 
@@ -90,7 +95,8 @@ class Tokenizer:
 
         return words_in_sentence
 
-    def words_per_sentence_to_words(self, words_per_sentence: list[list[str]]) -> list[str]:
+    @staticmethod
+    def words_per_sentence_to_words(words_per_sentence: List[List[str]]) -> List[str]:
         return flatten_nested_lists(collection=words_per_sentence)
 
 
@@ -99,7 +105,7 @@ class POSTagger:
         pass
 
     @staticmethod
-    def generate_tags(collection: list[list[str]]) -> list[list[tuple[str, str]]]:
+    def generate_tags(collection: List[List[str]]) -> List[List[tuple[str, str]]]:
         result = []
         for value in collection:
             pos_tokens_per_sentence = nltk.pos_tag(value)
@@ -124,7 +130,7 @@ class Lemmatizer:
     def __init__(self) -> None:
         self._lemmatizer: WordNetLemmatizer = WordNetLemmatizer()
 
-    def lemmatize(self, collection: list[list[str]]):
+    def lemmatize(self, collection: List[List[str]]):
         result = []
         for value in collection:
             sub_result = []
@@ -141,32 +147,32 @@ class Lemmatizer:
 
 class File:
     def __init__(self) -> None:
-        self.text: str = None
-        self.tokens: dict = None
-        self.pos: dict = None
-        self.lemma: dict = None
-        self.stop_word_free: dict = None
-        self.word_frequency: dict = None
-        self.tf_idf: dict = None
-        self.stemmed: dict = None
-        self.page_rank: dict = None
+        self.text: Union[str, None] = None
+        self.tokens: Union[Dict, None] = None
+        self.pos: Union[Dict, None] = None
+        self.lemma: Union[Dict, None] = None
+        self.stop_word_free: Union[Dict, None] = None
+        self.word_frequency: Union[Dict, None] = None
+        self.tf_idf: Union[Dict, None] = None
+        self.stemmed: Union[Dict, None] = None
+        self.page_rank: Union[Dict, None] = None
 
     def add_text(self, txt: str) -> None:
         self.text = txt
 
-    def get_text(self) -> str:
+    def get_text(self) -> Union[str, None]:
         return self.text
 
     def add_metric(self, metric_type: str, key: str, value: Any) -> None:
-        if not isinstance(getattr(self, metric_type), dict):
+        if not isinstance(getattr(self, metric_type), Dict):
             setattr(self, metric_type, {})
 
         getattr(self, metric_type)[key] = value
 
-    def get_metric(self, metric_type: str, key: str = None) -> Any:
+    def get_metric(self, metric_type: str, key: Union[str, None] = None) -> Any:
         if not key:
             return getattr(self, metric_type, None)
         return getattr(self, metric_type, {}).get(key, None)
 
-    def as_dict(self) -> dict:
+    def as_dict(self) -> Dict:
         return self.__dict__
