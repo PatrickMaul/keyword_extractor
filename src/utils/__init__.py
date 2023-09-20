@@ -2,9 +2,10 @@ import re
 import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
+from typing import Any
 
 
-def flatten_nested_lists(collection: list[list | str]) -> list[any]:
+def flatten_nested_lists(collection: list[list | str]) -> list[Any]:
     flatted_list = []  # Set empty flatted list
 
     for value in collection:
@@ -28,7 +29,7 @@ def remove_duplicates(collection: list[str]) -> list[str]:
     return duplicate_free_result
 
 
-def remove_stop_words(collection: list[list[str]], lang: str = 'english'):
+def remove_stop_words(collection: list[list[str]], lang: str = "english"):
     stop_words: set = set(stopwords.words(lang))
     filtered_words_per_sentence = []
 
@@ -53,21 +54,25 @@ class Tokenizer:
         # Step 1: txt.split('\n')
         # Step 2: [x.strip() for x in Step 1 if x]
         # Step 3: [y for y in Step 2 if y]
-        return [y for y in [x.strip() for x in txt.split('\n') if x] if y]
+        return [y for y in [x.strip() for x in txt.split("\n") if x] if y]
 
     def paragraphs_to_sentences_per_paragraph(self, paragraphs: list[str]) -> list[list[str]]:
         sentences_per_paragraph: list = []  # Set empty result list
 
         for paragraph in paragraphs:  # Iterate through all paragraphs
-            sentences = [x.strip() for x in paragraph.split('.') if x]  # Split by regular sentence seperator '.'
+            sentences = [
+                x.strip() for x in paragraph.split(".") if x
+            ]  # Split by regular sentence seperator '.'
 
             for index, value in enumerate(sentences):  # Iterate through all sentence inside a paragraph
-                if '?' in value:  # Split by '?'
-                    sentences[index] = value.split('?')
-                if '!' in value:  # Split by '!'
-                    sentences[index] = value.split('!')
+                if "?" in value:  # Split by '?'
+                    sentences[index] = value.split("?")
+                if "!" in value:  # Split by '!'
+                    sentences[index] = value.split("!")
             sentences = flatten_nested_lists(collection=sentences)  # Remove nested lists
-            sentences_per_paragraph.append([x.strip() for x in sentences if x])  # Remove leading or trailing spaces
+            sentences_per_paragraph.append(
+                [x.strip() for x in sentences if x]
+            )  # Remove leading or trailing spaces
 
         return sentences_per_paragraph
 
@@ -76,7 +81,7 @@ class Tokenizer:
 
     @staticmethod
     def sentences_to_words_per_sentence(sentences: list[str]) -> list[list[str]]:
-        pattern = r'\b\w+\b'
+        pattern = r"\b\w+\b"
         words_in_sentence = []
 
         for sentence in sentences:
@@ -101,14 +106,14 @@ class POSTagger:
             sub_result = []
 
             for token in pos_tokens_per_sentence:
-                if token[1] in ['N', 'NN', 'NNS', 'NNP', 'NNPS']:  # Nouns
-                    sub_result.append((token[0], 'n'))
-                elif token[1] in ['JJ', 'JJR', 'JJS']:  # Adjectives
-                    sub_result.append((token[0], 'a'))
-                elif token[1] in ['RB', 'RBR', 'RBS']:  # Adverbs
-                    sub_result.append((token[0], 'r'))
-                elif token[1] in ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']:  # Verbs
-                    sub_result.append((token[0], 'v'))
+                if token[1] in ["N", "NN", "NNS", "NNP", "NNPS"]:  # Nouns
+                    sub_result.append((token[0], "n"))
+                elif token[1] in ["JJ", "JJR", "JJS"]:  # Adjectives
+                    sub_result.append((token[0], "a"))
+                elif token[1] in ["RB", "RBR", "RBS"]:  # Adverbs
+                    sub_result.append((token[0], "r"))
+                elif token[1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]:  # Verbs
+                    sub_result.append((token[0], "v"))
                 else:
                     sub_result.append((token[0], token[1]))
             result.append(sub_result)
@@ -125,7 +130,7 @@ class Lemmatizer:
             sub_result = []
 
             for token in value:
-                if token[1] in ['n', 'a', 'r', 'v']:
+                if token[1] in ["n", "a", "r", "v"]:
                     sub_result.append(self._lemmatizer.lemmatize(token[0], token[1]))
                 else:
                     sub_result.append(self._lemmatizer.lemmatize(token[0]))
@@ -152,13 +157,13 @@ class File:
     def get_text(self) -> str:
         return self.text
 
-    def add_metric(self, metric_type: str, key: str, value: any) -> None:
+    def add_metric(self, metric_type: str, key: str, value: Any) -> None:
         if not isinstance(getattr(self, metric_type), dict):
             setattr(self, metric_type, {})
 
         getattr(self, metric_type)[key] = value
 
-    def get_metric(self, metric_type: str, key: str = None) -> any:
+    def get_metric(self, metric_type: str, key: str = None) -> Any:
         if not key:
             return getattr(self, metric_type, None)
         return getattr(self, metric_type, {}).get(key, None)

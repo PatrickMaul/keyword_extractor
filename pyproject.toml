@@ -20,6 +20,7 @@ dependencies = [
     "regex==2023.8.8",
     "scipy==1.11.2",
     "tqdm==4.66.1",
+    "pre-commit==3.4.0",
 ]
 
 [project.optional-dependencies]
@@ -48,12 +49,12 @@ platforms = ["Linux"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
-exclude = ["test"]
+exclude = ["test", "assets"]
 
 [tool.black]
-line-length = 120
+line-length = 110
 
-# [[tool.mypy.overrides]]
-# module = "foo.*"
-# ignore_missing_imports = true
+[[tool.mypy.overrides]]
+module = "nltk.*"
+ignore_missing_imports = true
 
