@@ -2,8 +2,8 @@
 
 # Python Package Template
 
-[![Unittest](https://github.com/PatrickMaul/config_loader_pkg/actions/workflows/unittest.yml/badge.svg)](https://github.com/PatrickMaul/config_loader_pkg/actions/workflows/unittest.yml)
-[![codecov](https://codecov.io/gh/PatrickMaul/config_loader_pkg/graph/badge.svg?token=TSJ32TOKBJ)](https://codecov.io/gh/PatrickMaul/config_loader_pkg)
+[![Unittest](https://github.com/PatrickMaul/keyword_extractor/actions/workflows/unittest.yml/badge.svg)](https://github.com/PatrickMaul/keyword_extractor/actions/workflows/unittest.yml)
+[![codecov](https://codecov.io/gh/PatrickMaul/keyword_extractor/graph/badge.svg?token=quPknerfcz)](https://codecov.io/gh/PatrickMaul/keyword_extractor)
 
 This repository is just a template for Python Packages.
 
@@ -66,7 +66,7 @@ To run unittests for the `keyword_extractor` module, follow these steps:
     - Execute the following command to run coverage tests:  
       **Note**: Install command for `coverage`: `pip install -U coverage`
        ```bash
-       coverage run --source=./pm_config_loader -m unittest discover ./test/tests/unit && coverage html -d test/tests/htmlcov
+       coverage run --source=./src -m unittest discover test/tests/unit && coverage html -d test/tests/htmlcov
        ```
       **Note**: You might need to export the `PYTHONPATH`.
 

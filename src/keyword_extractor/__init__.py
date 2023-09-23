@@ -1,6 +1,9 @@
+import argparse
+import json
 import math
+import networkx
+import os
 from nltk.stem import PorterStemmer
-import networkx as nx
 from utils import (
     Tokenizer,
     POSTagger,
@@ -10,7 +13,64 @@ from utils import (
     remove_duplicates,
     remove_stop_words,
 )
-from typing import Dict, List
+from typing import Union, Optional
+
+
+def run() -> None:
+    # Init ArgumentParser
+    parser = argparse.ArgumentParser(
+        prog="Keyword extractor", description="Extracts keywords from a text or directory with texts."
+    )
+
+    # Add arguments
+    parser.add_argument("-t", "--text", type=str, dest="text", help="Text for extraction")
+    parser.add_argument("-f", "--file-path", type=str, dest="file_path", help="Path to text for extraction")
+    parser.add_argument(
+        "-d", "--dir-path", type=str, dest="dir_path", help="Path to directory for extraction"
+    )
+    parser.add_argument(
+        "-m",
+        "--extraction-method",
+        type=str,
+        dest="extraction_method",
+        default="wf",
+        help="Extraction method (wf => Word Frequency, tfidf => Term Frequency Inverse Document "
+        "Frequency, pr => Page Rank",
+    )
+    parser.add_argument(
+        "-o", "--output", type=str, dest="output", help="Destination for output. (keywords.json)"
+    )
+    parser.add_argument("-p", "--print", action="store_true", dest="print", help="Print result in console")
+
+    # Get arguments & load config
+    args = parser.parse_args()
+    result: Optional[dict] = None
+    keyword_extractor: Union[KeywordExtractor, KeywordExtractorDirectory]
+
+    if args.text and args.extraction_method:
+        keyword_extractor = KeywordExtractor(txt=args.text, method=args.extraction_method)
+        result = keyword_extractor.extract()
+    elif args.file_path and args.extraction_method:
+        with open(args.file_path, "r") as file:
+            text: str = file.read()
+
+        keyword_extractor = KeywordExtractor(txt=text, method=args.extraction_method)
+        result = keyword_extractor.extract()
+    elif args.dir_path and args.extraction_method:
+        keyword_extractor = KeywordExtractorDirectory(directory=args.dir_path, method=args.extraction_method)
+        result = keyword_extractor.extract()
+    else:
+        print("Somthing went wrong")
+
+    if args.output and result:
+        with open(os.path.join(args.output, "keywords.json"), "w") as file:
+            file.write(json.dumps(result))
+    if args.print and result:
+        if args.dir_path:
+            for key, value in result.items():
+                print(f"Keywords for '{key}': {', '.join(value.get('keywords'))}")
+        else:
+            print(result.get("keywords"))
 
 
 class KeywordExtractor:
@@ -25,8 +85,8 @@ class KeywordExtractor:
     def update_txt(self, new_txt: str) -> None:
         self.txt = new_txt
 
-    def _extract(self) -> Dict:
-        result: Dict = {"text": self.txt, "extraction_method": self.method, "keywords": [], "file": File()}
+    def extract(self) -> dict:
+        result: dict = {"text": self.txt, "extraction_method": self.method, "keywords": [], "file": File()}
 
         if self.method == "wf":
             keywords, file = self._extract_with_word_frequency()
@@ -49,12 +109,12 @@ class KeywordExtractor:
 
         return result
 
-    def _extract_with_word_frequency(self, max_keywords: int = 10) -> List:
+    def _extract_with_word_frequency(self, max_keywords: int = 10) -> list:
         file: File = self._base_extraction()
 
-        clean_words: List = file.get_metric(metric_type="stop_word_free", key="words")
+        clean_words: list = file.get_metric(metric_type="stop_word_free", key="words")
 
-        word_counts: Dict = {}
+        word_counts: dict = {}
         for word in clean_words:
             if word not in word_counts.keys():
                 word_counts[word] = 1
@@ -63,7 +123,7 @@ class KeywordExtractor:
 
         raw_file_length: int = len(file.get_metric(metric_type="tokens", key="words"))
 
-        term_frequencies: Dict = {}
+        term_frequencies: dict = {}
         for word, count in word_counts.items():
             term_frequencies[word] = count / raw_file_length
 
@@ -79,7 +139,7 @@ class KeywordExtractor:
             file,
         ]
 
-    def _extract_with_tf_idf(self, doc_counter: int = 1, max_keywords: int = 10) -> List:
+    def _extract_with_tf_idf(self, doc_counter: int = 1, max_keywords: int = 10) -> list:
         file: File = self._extract_with_word_frequency()[1]
         tokens = file.get_metric(metric_type="word_frequency", key="word_counts").keys()
         document_frequencies = {}
@@ -95,7 +155,7 @@ class KeywordExtractor:
         for key, value in document_frequencies.items():
             inverse_document_frequencies[key] = 1 + math.log(doc_counter / value)
 
-        keys: List[str] = list(inverse_document_frequencies.keys())
+        keys: list[str] = list(inverse_document_frequencies.keys())
         for index, key in enumerate(keys):
             tf_idf: float = list(inverse_document_frequencies.values())[index]
             term_frequency_inverse_document_frequencies[key] = (
@@ -120,7 +180,7 @@ class KeywordExtractor:
             file,
         ]
 
-    def _extract_with_page_rank(self, doc_counter: int = 1, max_keywords: int = 10) -> List:
+    def _extract_with_page_rank(self, doc_counter: int = 1, max_keywords: int = 10) -> list:
         file: File = self._extract_with_tf_idf(doc_counter=doc_counter)[1]
 
         stemmed_words = []
@@ -141,7 +201,7 @@ class KeywordExtractor:
             value=remove_duplicates(collection=file.get_metric(metric_type="stemmed", key="words")),
         )
 
-        graph = nx.Graph()
+        graph = networkx.Graph()
         for sentence in file.get_metric(metric_type="stemmed", key="words_per_sentence"):
             graph.add_nodes_from(sentence)
             for word1 in sentence:
@@ -149,7 +209,7 @@ class KeywordExtractor:
                     if word1 != word2:
                         graph.add_edge(word1, word2)
 
-        scores = nx.pagerank(graph)
+        scores = networkx.pagerank(graph)
         file.add_metric(metric_type="page_rank", key="scores", value=scores)
         top_keywords = self._get_keywords(
             data=file.get_metric(metric_type="page_rank", key="scores"), max_length=max_keywords
@@ -279,7 +339,7 @@ class KeywordExtractor:
         return file
 
     @staticmethod
-    def _get_keywords(data: Dict, max_length: int = 10):
+    def _get_keywords(data: dict, max_length: int = 10):
         mapped_list = []
         for key, value in data.items():
             mapped_list.append({"word": key, "value": value})
@@ -291,3 +351,34 @@ class KeywordExtractor:
             top_keywords.append(keywords_sorted[index].get("word"))
 
         return top_keywords
+
+
+class KeywordExtractorDirectory:
+    def __init__(self, directory: str, method: str) -> None:
+        self.directory: str = directory
+        self.method: str = method
+        self._paths: list[str] = self._scan_directory()
+
+    def _scan_directory(self, directory: Optional[str] = None) -> list[str]:
+        directory = directory or self.directory
+
+        paths: list[str] = [os.path.join(directory, path) for path in os.listdir(directory)]
+        result_paths: list[str] = []
+
+        for path in paths:
+            if os.path.isfile(path):
+                result_paths.append(path)
+            elif os.path.isdir(path):
+                for item in self._scan_directory(path):
+                    result_paths.append(item)
+
+        return result_paths
+
+    def extract(self):
+        result: dict[str, dict] = {}
+        for path in self._paths:
+            with open(path, "r") as file:
+                text: str = file.read()
+                result[path] = KeywordExtractor(txt=text, method=self.method).extract()
+
+        return result

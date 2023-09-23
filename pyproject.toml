@@ -44,6 +44,9 @@ dev = [
 "Homepage" = "https://github.com/PatrickMaul/keyword_extractor"
 "Bug Tracker" = "https://github.com/PatrickMaul/keyword_extractor/issues"
 
+[project.scripts]
+keyword_extractor = "keyword_extractor:run"
+
 [tool.setuptools]
 platforms = ["Linux"]
 
